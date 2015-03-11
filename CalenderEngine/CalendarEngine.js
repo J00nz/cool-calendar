@@ -521,11 +521,7 @@ function DrawActsInsidePeriod(context, currIndx, currTime, nextTime, left, ceil,
                         end = ((Acts[currIndx].end < nextTime) ? (Acts[currIndx].end - currTime) : 1440),
                         height = GetRounded(minInc * (end - start));
         if (typeof (Acts[currIndx].style) != 'undefined' && Acts[currIndx].style != "1") {
-            if(Acts[currIndx].style[0] === '#'){
-                fills = Acts[currIndx].style;
-            } else{
-                fills = "rgba(" + Acts[currIndx].style;
-            }
+            fills = "rgba(" + Acts[currIndx].style;
         } else { fills = "rgba(175,175,175"; }
 
         context.fillStyle = fills + opc;

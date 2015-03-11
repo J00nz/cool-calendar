@@ -66,7 +66,7 @@
                                         var endMin = (end.getTime() - refDate) / 60000;
                                         
                                         var act = new Act(startMin, endMin);
-                                        act.style = item.backgroundColor;
+                                        act.style = hexToRgb(item.backgroundColor);
                                         act.code = event.summary;
                                         Acts.push(act);
                                         
@@ -93,6 +93,12 @@
             
           
         }
+        
+        function hexToRgb(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? ('' + parseInt(result[1], 16) + ',' + parseInt(result[2], 16) + ',' + parseInt(result[3], 16)): null;
+        }
+        
         window.addEventListener('load', auth);
     </script>
     <script type="text/javascript" src="./CalenderEngine/jquery-2.1.1.min.js"></script>
