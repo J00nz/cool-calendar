@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html style="overflow:hidden; width: 100vw; height: 100vh;">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas Calendar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="https://apis.google.com/js/client.js"></script>
+    <script>
+        var drawTimer;
+        
+        function auth() {
+            var config = {
+                'client_id': '352890205109-ojtsro0qs56nfkd1d9t81stj7qocev68.apps.googleusercontent.com',
+                'scope': 'https://www.googleapis.com/auth/calendar.readonly',
+            };
+            gapi.client.setApiKey('AIzaSyCPnGFKd8rZBEfiZRAeTVuEy_uZv0kN0_4');
+            gapi.auth.authorize(config, function(authResult) {
+                console.log('login complete');
+                console.log(gapi.auth.getToken());
+                
+                  gapi.client.load('calendar', 'v3').then(function() {
+                    var request = gapi.client.calendar.calendarList.list({
+                        'userId': 'me'
+                    });
+                    request.then(function(resp) {                        
+                        var today = new Date();
+                        var thisMonth = (new Date(today.getFullYear(),today.getMonth(),1)).toJSON();
+                        var refDate = new Date(2000, 01, 01).getTime();
+                        
+                        resp.result.items.forEach(function(item){
+                            
+                            var calReq = gapi.client.calendar.events.list({
+                                'calendarId': item.id,
+                                'timeMin': thisMonth
+                            });
+                            
+                            calReq.then(function(res) {
+                                res.result.items.forEach(function(event){
+                                    console.log(event);
+                                    var start, end, dt;
+                                    
+                                    if(!event.start || !event.end){
+                                        return;
+                                    }
+                                    
+                                    if (event.start.date){
+                                        dt = event.start.date.split('-');
+                                        start = new Date(dt[0], dt[1], dt[2]);
+                                    }                                    
+                                    if (event.end.date){
+                                        dt = event.end.date.split('-');
+                                        end = new Date(dt[0], dt[1], dt[2]);
+                                    }
+
+                                    if (event.start.dateTime){
+                                        start = new Date(event.start.dateTime);
+                                        start = new Date(start.getFullYear(), start.getMonth() +1, start.getDate(), start.getHours(), start.getMinutes());
+                                    }                                    
+                                    if (event.end.dateTime){
+                                        end = new Date(event.end.dateTime);
+                                        end = new Date(end.getFullYear(), end.getMonth() +1, end.getDate(), end.getHours(), end.getMinutes());
+                                    }
+
+                                    if (start && end) {
+                                        var startMin = (start.getTime() - refDate) / 60000;
+                                        var endMin = (end.getTime() - refDate) / 60000;
+                                        
+                                        var act = new Act(startMin, endMin);
+                                        act.style = "0,255,0";
+                                        act.code = event.summary;
+                                        Acts.push(act);
+                                        
+                                        if(!drawTimer){
+                                            drawTimer = setTimeout(function(){
+                                                SortActs();
+                                                DrawCalendar();
+                                            }, 500);
+                                        }
+                                    }
+                                    
+                                });
+                            });
+                        });
+                        
+                    }, function(reason) {
+                        console.log('Error: ' + reason.result.error.message);
+                    });
+                });
+                
+            }).then(function(result){
+                console.log(result);
+            });
+            
+          
+        }
+        window.addEventListener('load', auth);
+    </script>
+    <script type="text/javascript" src="./CalenderEngine/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="./CalenderEngine/CalendarEngine.js"></script>
+    <script type="text/javascript" src="./CalenderEngine/CalendarScripts.js"></script>
+</head>
+<body style="margin:0;">
+    <input type="hidden" id="jsActs" >
+    <div style="width: 100vw; height: 100vh; padding: 0; margin: 0; background-color: #808080;">
+        <canvas class="calendarCanvas" style="opacity: 1.0; width: 100vw; height: 100vh;">
+        </canvas>
+    </div>
+</body>
+</html>
